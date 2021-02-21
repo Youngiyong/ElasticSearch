@@ -11026,3 +11026,4 @@ java.io.FileNotFoundException: C:\Users\kosmo_13\.m2\repository\org\elasticsearc
 2021-02-21 11:01:13,022 [Worker-293: Launching demo - TestApplication] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered resources.
 2021-02-21 11:01:13,022 [Worker-293: Launching demo - TestApplication] INFO  o.e.m.c.i.embedder.EclipseLogger - Using 'UTF-8' encoding to copy filtered properties files.
 2021-02-21 11:01:13,022 [Worker-293: Launching demo - TestApplication] INFO  o.e.m.c.i.embedder.EclipseLogger - skip non existing resourceDirectory D:\portfolio\noname\demo\src\test\resources
+2021-02-21 11:31:05,742 [Worker-2: Loading available Gradle versions] INFO  o.e.b.c.i.u.g.PublishedGradleVersions - Gradle version information cache is up-to-date. Trying to read.
