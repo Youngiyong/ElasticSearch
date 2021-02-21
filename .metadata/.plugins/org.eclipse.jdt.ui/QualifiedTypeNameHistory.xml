@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+    <fullyQualifiedTypeName name="org.elasticsearch.action.search.SearchRequest"/>
+    <fullyQualifiedTypeName name="org.elasticsearch.index.query.QueryBuilders"/>
+    <fullyQualifiedTypeName name="org.elasticsearch.search.SearchHit"/>
+    <fullyQualifiedTypeName name="org.elasticsearch.index.query.BoolQueryBuilder"/>
+    <fullyQualifiedTypeName name="org.springframework.web.bind.annotation.RestController"/>
+    <fullyQualifiedTypeName name="org.springframework.web.bind.annotation.RequestMapping"/>
+    <fullyQualifiedTypeName name="org.elasticsearch.client.RestHighLevelClient"/>
+    <fullyQualifiedTypeName name="org.elasticsearch.client.RestClient"/>
+    <fullyQualifiedTypeName name="org.apache.http.HttpHost"/>
+    <fullyQualifiedTypeName name="org.elasticsearch.common.xcontent.XContentBuilder"/>
+    <fullyQualifiedTypeName name="org.elasticsearch.common.xcontent.XContentFactory"/>
+    <fullyQualifiedTypeName name="org.elasticsearch.action.admin.indices.create.CreateIndexRequest"/>
+    <fullyQualifiedTypeName name="org.elasticsearch.client.indices.CreateIndexResponse"/>
+    <fullyQualifiedTypeName name="org.elasticsearch.action.admin.indices.alias.Alias"/>
+    <fullyQualifiedTypeName name="org.elasticsearch.search.builder.SearchSourceBuilder"/>
+    <fullyQualifiedTypeName name="org.elasticsearch.action.search.SearchResponse"/>
+    <fullyQualifiedTypeName name="org.elasticsearch.client.RequestOptions"/>
+    <fullyQualifiedTypeName name="org.elasticsearch.search.aggregations.metrics.ValueCountAggregationBuilder"/>
+    <fullyQualifiedTypeName name="org.elasticsearch.search.aggregations.AggregationBuilders"/>
+    <fullyQualifiedTypeName name="org.elasticsearch.client.RequestOptions.Builder"/>
+    <fullyQualifiedTypeName name="org.elasticsearch.search.aggregations.AggregationBuilder"/>
+    <fullyQualifiedTypeName name="org.elasticsearch.search.aggregations.bucket.histogram.Histogram"/>
+    <fullyQualifiedTypeName name="org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket"/>
+    <fullyQualifiedTypeName name="org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder"/>
+</qualifiedTypeNameHistroy>

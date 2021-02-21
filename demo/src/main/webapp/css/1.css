@@ -1,0 +1,333 @@
+
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans+KR:300,400&display=swap&subset=korean');
+
+html {
+    font-family: "Noto Sans KR", sans-serif;
+}
+
+/* 노말라이즈 */
+body, ul, li, dl, dt, dd, h1, h2, h3, h4, h5, p, figure {
+    margin:0;
+    padding:0;
+    list-style:none;
+}
+
+h1, h2, h3, h4, strong, th {
+    font-weight:normal;
+    font-family:inherit;
+    color:inherit;
+}
+
+a {
+    color:inherit;
+    text-decoration:none;
+}
+
+/* 라이브러리 */
+.con {
+    margin:0 auto;
+}
+
+.img-box > img {
+    width:100%;
+    display:block;
+}
+
+.row::after {
+    content:"";
+    display:block;
+    clear:both;
+}
+
+.cell {
+    float:left;
+    box-sizing:border-box;
+}
+
+.cell-right {
+    float:right;
+    box-sizing:border-box;
+}
+
+.margin-0-auto {
+    margin:0 auto;
+}
+
+.block {
+    display:block;
+}
+
+.inline-block {
+    display:inline-block;
+}
+
+.text-align-center {
+    text-align:center;
+}
+
+.line-height-0-ch-only {
+    line-height:0;
+}
+
+.line-height-0-ch-only > * {
+    line-height:normal;
+}
+
+.relative {
+    position:relative;
+}
+
+.absolute-left {
+    position:absolute;
+    left:0;
+}
+
+.absolute-right {
+    position:absolute;
+    right:0;
+}
+
+.absolute-middle {
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+}
+
+.table {
+    display:table;
+}
+
+.table-cell {
+    display:table-cell;
+}
+
+input, button, select, fieldset {
+    -webkit-border-radius: 0;
+    border-radius: 0;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border:0;
+    background-color:transparent;
+}
+
+fieldset {
+    padding:0;
+    margin:0;
+}
+
+.blind, legend {
+    overflow: hidden;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    font-size: 12px;
+    clip: rect(1px, 1px, 1px, 1px);
+}
+
+button {
+    cursor:pointer;
+    padding:0;
+}
+
+/* 커스텀 */
+
+.con {
+    width:1180px;
+}
+
+.con-min-width {
+    min-width:1180px;
+}
+
+body {
+    background-color:#afafaf;
+}
+
+/* 반응형 레이아웃 */
+/*
+.con {
+    max-width:1150px;
+}
+
+.con-min-width {
+    min-width:320px;
+}
+
+html, body {
+    overflow-x:hidden;
+}
+*/
+
+.search-popup {
+    position:absolute;
+    top:162px;
+    left:50%;
+    transform:translatex(-50%);
+}
+
+.search-popup > .tt {
+    font-size:52px;
+    font-weight:bold;
+    color:#fff;
+    margin-bottom:17px;
+    text-align:center;
+}
+
+/* close-btn */
+.search-popup > .close-btn {
+    position:absolute;
+    top:15px;
+    right:0;
+}
+
+.search-popup > .close-btn::after {
+    content:"";
+    display:block;
+    background:url('https://kimyang-sun.github.io/pf-img/samsung-img/sp-gnb-pc.png') no-repeat -35px -43px;
+    width:14px;
+    height:14px;
+}
+
+/* 서치 폼 */
+.search-popup > .search-form {
+    border-bottom:1px solid #6e6e6e;
+}
+
+.search-popup > .search-form .search-form-con {
+    position:relative;
+    background-color:#fff;
+    width:1156px;
+    height:98px;
+}
+
+.search-popup > .search-form .search-form-con > input {
+    margin-left:118px;
+    font-size:24px;
+    font-weight:bold;
+    width:858px;
+    height:100%;
+}
+
+/* 서치 폼 아이콘 */
+.search-popup > .search-form .search-form-con > button {
+    position:absolute;
+    top:50%;
+    transform:translatey(-50%);
+}
+
+/* x 아이콘 */
+.search-popup > .search-form .search-form-con > .search-cancel::before {
+    content:"";
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%);
+    background-color:#a0a0a0;
+    width:25px;
+    height:25px;
+    border-radius:50%;
+}
+
+.search-popup > .search-form .search-form-con > .search-cancel::after {
+    content:"";
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%);
+    background:url('https://kimyang-sun.github.io/pf-img/samsung-img/sp-gnb-pc.png') no-repeat -35px -43px;
+    width:14px;
+    height:14px;
+}
+
+/* 화살표 아이콘 */
+.search-popup > .search-form .search-form-con > .search-submit {
+    margin-left:30px;
+}
+
+.search-popup > .search-form .search-form-con > .search-submit::after {
+    content:"";
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%);
+    background:url('https://kimyang-sun.github.io/pf-img/samsung-img/sp-gnb-pc.png') no-repeat -73px -76px;
+    width:13px;
+    height:14px;
+}
+
+/* 서치 결과 추천 검색 */
+.search-popup > .search-result-wrap {
+    background-color:#fff;
+    width:1156px;
+    display:none;
+}
+
+.search-popup > .search-result-wrap.active {
+    display:block;
+}
+
+.search-popup > .search-result-wrap > .search-result {
+    padding:24px 118px 27px;
+}
+
+.search-popup > .search-result-wrap > .search-result > ul > strong {
+    display:block;
+    font-size:20px;
+    margin-bottom:10px;
+}
+
+.search-popup > .search-result-wrap > .search-result > ul > strong > i {
+    margin-right:5px;
+}
+
+.search-popup > .search-result-wrap > .search-result > ul > li {
+    padding-left:22px;
+}
+
+.search-popup > .search-result-wrap > .search-result > ul > li > a {
+    font-size:18px;
+    font-weight:300;
+    margin-bottom:10px;
+}
+
+/* 서치 팝업 반응형 */
+@media (max-width:1440px){
+    .search-popup {
+        width:80%;
+    }
+
+    .search-popup > .tt {
+        font-size:3.6vw;
+        margin-bottom:1.2vw;
+    }
+
+    .search-popup > .search-form .search-form-con {
+        width:80vw;
+        height:6.8vw;
+    }
+
+    .search-popup > .search-form .search-form-con > input {
+        width:60vw;
+        margin-left:8vw;
+        font-size:1.6vw;
+    }
+
+    .search-popup > .search-result-wrap {
+        width:80vw;
+    }
+
+    .search-popup > .search-result-wrap > .search-result {
+        padding:1.6vw 8.2vw 1.8vw;
+    }
+
+    .search-popup > .search-result-wrap > .search-result > ul > strong {
+        font-size:1.4vw;
+        margin-bottom:0.5vw;
+        line-height:normal;
+    }
+
+    .search-popup > .search-result-wrap > .search-result > ul > li > a {
+        font-size:1.25vw;
+    }
+};

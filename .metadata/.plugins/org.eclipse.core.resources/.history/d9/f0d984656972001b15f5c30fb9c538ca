@@ -1,0 +1,32 @@
+<%@ page language="java" contentType="text/html; charset=EUC-KR"
+    pageEncoding="EUC-KR"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="EUC-KR">
+<title>login</title>
+  <script src="//developers.kakao.com/sdk/js/kakao.min.js"></script>
+        <script type='text/javascript'>
+                //<![CDATA[
+                // 사용할 앱의 JavaScript 키를 설정해 주세요.
+                var isKakaoRunning = false;
+                Kakao.init('614be520fd0601d34596bc8743820bae');
+                function loginWithKakao() {
+      //              if( isKakaoRunning ) return;
+      //              else isKakaoRunning = true;
+                    Kakao.Auth.authorize({
+
+                        redirectUri: 'http://localhost:8080/test'
+                    });
+                    setTimeout(function(){ isKakaoRunning=false; }, 250);
+                };
+                //]]>
+      	</script>
+   
+</head>
+<body>
+<div class="c_login_kakao" data-log-actionid-label="kakao"><a href="javascript:loginWithKakao();"><span>카카오</span>로 시작하기</a></div>
+
+
+</body>
+</html>

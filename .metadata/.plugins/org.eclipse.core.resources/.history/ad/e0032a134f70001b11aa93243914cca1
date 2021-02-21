@@ -1,0 +1,61 @@
+<%@ page language="java" contentType="text/html; charset=EUC-KR"
+    pageEncoding="EUC-KR"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="EUC-KR">
+<title>Insert title here</title>
+<link  rel="stylesheet" src="./css/2.css">
+</head>
+<body>
+   <div class="searchbox">
+      <div class="header">
+        <h1>Search</h1>
+        <input onkeyup="filter()" type="text" id="value" placeholder="Type to Search">
+      </div>
+
+      <div class="container">
+
+        <div class="item">
+          <span class="icon">A</span>
+          <span class="name">Apple</span>
+        </div>
+
+        <div class="item">
+          <span class="icon">O</span>
+          <span class="name">Orange</span>
+        </div>
+
+        <div class="item">
+          <span class="icon">M</span>
+          <span class="name">Mandarin</span>
+        </div>
+
+        <div class="item">
+          <span class="icon">S</span>
+          <span class="name">Strawberry</span>
+        </div>
+
+        <div class="item">
+          <span class="icon">W</span>
+          <span class="name">Watermelon</span>
+        </div>
+
+        <div class="item">
+          <span class="icon">G</span>
+          <span class="name">Grape</span>
+        </div>
+
+        <div class="item">
+          <span class="icon">P</span>
+          <span class="name">Pear</span>
+        </div>
+
+        <div class="item">
+          <span class="icon">C</span>
+          <span class="name">Cherry</span>
+        </div>
+      </div>
+    </div>
+</body>
+</html>

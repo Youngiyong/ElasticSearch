@@ -1,0 +1,29 @@
+<%@ page language="java" contentType="text/html; charset=EUC-KR"
+    pageEncoding="EUC-KR"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="EUC-KR">
+<title>login</title>
+        <script type='text/javascript'>
+                //<![CDATA[
+                // 사용할 앱의 JavaScript 키를 설정해 주세요.
+                var isKakaoRunning = false;
+                Kakao.init('3c1a6c7406b2d5dfb997df33064e2881');
+                function loginWithKakao() {
+                    if( isKakaoRunning ) return;
+                    else isKakaoRunning = true;
+                    Kakao.Auth.authorize({
+                        state: '664cdf0b0f9a170678159175bdfc74652fe78a78db9293611165fb06486faa9ee933b79b',
+                        redirectUri: 'http://192.168.0.57:8080/test'
+                    });
+                    setTimeout(function(){ isKakaoRunning=false; }, 250);
+                };
+                //]]>
+</head>
+<body>
+
+
+
+</body>
+</html>

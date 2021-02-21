@@ -1,0 +1,58 @@
+<%@ page language="java" contentType="text/html; charset=EUC-KR"
+    pageEncoding="EUC-KR"%>
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="/examples/stylesheets/ui-lightness/jquery-ui-1.8.16.custom.css" type="css">
+    <script type="text/javascript" src="/examples/javascripts/jquery.min.js"></script>
+    <script type="text/javascript" src="/examples/javascripts/jquery.base64.min.js"></script>
+    <script type="text/javascript" src="/examples/javascripts/jquery-ui-1.8.16.custom.min.js"></script>
+    <script type="text/javascript" src="/examples/javascripts/jquery.tmpl.min.js"></script>
+</head>
+
+<body>
+<script>
+
+    $(function() {
+        $("#keyword").autocomplete({
+            source: function(request, response) {
+                var wildcard = { "name": "*" + request.term.toLowerCase() + "*" };
+                var postData = {
+                    "query": { "wildcard": wildcard },
+                    "fields": ["name", "_id"]
+                };
+                $.ajax({
+                    url: "http://192.168.0.57:8080/news-2021.02.14/_search",
+                    type: "POST",
+                    dataType: "JSON",
+                    data: JSON.stringify(postData),
+                    success: function(data) {
+                        response($.map(data.hits.hits, function(item) {
+                            return {
+                                label: item.fields.name,
+                                id: item.fields._id
+                            }
+                        }));
+                    },
+                });
+            },
+            minLength: 2
+        })
+    });
+
+
+</script>
+
+
+<div class="demo">
+    <h1>Autocomplete using cross origin resource sharing with elasticsearch</h1>
+    <br>
+
+    <div class="ui-widget">
+        <label for="keyword">Keyword: </label>
+        <input id="keyword">
+    </div>
+ 
+
+</body>
+</html>

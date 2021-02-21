@@ -1,0 +1,425 @@
+package elk;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.apache.http.HttpHost;
+import org.elasticsearch.action.bulk.BulkItemResponse;
+import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
+import org.elasticsearch.search.aggregations.bucket.terms.*;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.delete.DeleteResponse;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.search.ClearScrollRequest;
+import org.elasticsearch.action.search.ClearScrollResponse;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchScrollRequest;
+import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.action.update.UpdateResponse;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.core.CountRequest;
+import org.elasticsearch.client.core.CountResponse;
+import org.elasticsearch.client.indices.CreateIndexRequest;
+import org.elasticsearch.client.indices.CreateIndexResponse;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.unit.Fuzziness;
+import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.UpdateByQueryRequest;
+import org.elasticsearch.script.Script;
+import org.elasticsearch.script.ScriptType;
+import org.elasticsearch.search.Scroll;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.BucketOrder;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregator;
+import org.elasticsearch.search.aggregations.metrics.AvgAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.SumAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ValueCountAggregationBuilder;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.ScoreSortBuilder;
+import org.elasticsearch.search.sort.SortOrder;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.elasticsearch.search.aggregations.BucketOrder;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+@RestController
+public class ElasticSearchController {
+
+	@Autowired
+	RestHighLevelClient client;
+	
+	static int count;
+	//RestHighLevelClient사용후 반드 Close를 해야된다고 필히 명시가 되어 있었고
+	//그에 따른 Spring에서 Bean 어노테이션에 destroymethod 속성을 사용해서 자원을 해제 할 수 있음
+	@Bean(destroyMethod = "close")
+	@Scope("prototype")//prototype : 어플리케이션에서 요청시 (getBean()) 마다 스프링이 새 인스턴스를 생성
+	public RestHighLevelClient restHighLevelClient(){
+	      return new RestHighLevelClient(RestClient.builder(new HttpHost("192.168.56.101",9200,"http")));
+	}
+	
+	@GetMapping(value = "/create")
+	public String ping() throws IOException {
+		CreateIndexRequest request = new CreateIndexRequest("news_keyword-2021.02.16");
+		request.settings(Settings.builder()
+				.put("index.number_of_shards", 2)
+				.put("index.number_of_replicas", 3)
+				);
+		request.mapping( 
+				
+		        "{\n" +
+		                "  \"properties\": {\n" +
+		                "    \"word\": {\n" +
+		                "      \"type\": \"text\",\n" +
+		                "        \"fields\": {\n"+
+		                "        	\"keyword\": {\n"+
+		                "			\"type\": \"keyword\",\n"+
+		                "			 \"ignore_above\": 256 \n"+
+		                "    }\n" +
+		                "  }\n" +
+		                "  }\n" +
+		                "  }\n" +
+		                "}", 
+//				"{\n" +
+//		        "  \"properties\": {\n" +
+//		        "    \"word\": {\n" +
+//		        "      \"type\": \"text\"\n" +
+//		        "        \"fields\": {\n"+
+//		        "        	\"keyword\": {\n"+
+//		        "			\"type\": \"keyword\"\n"+
+////		        "			 \"ignore_above\": 256 \n"+
+//		        "    		}\n" +
+//		        "  		}\n" +
+//		        "  	}\n" +
+//		        "  }\n" +
+//		        "}", 
+		        XContentType.JSON);
+
+		CreateIndexResponse indexResponse = client.indices().create(request, RequestOptions.DEFAULT);
+		return "created";
+		}
+	
+	@GetMapping(value = "/createIndex")
+	public void createIndex() {
+		
+	}
+	
+  @GetMapping(value = "/upsert")
+  public String upsert(String id) throws IOException {
+
+      Map<String, Object> jsonMap = new HashMap<>();
+      jsonMap.put("word", id);
+      jsonMap.put("date", new Date());
+      IndexRequest request = new IndexRequest("news_keyword-2021.02.16").id(String.valueOf(count++)).source(jsonMap);
+      IndexResponse indexResponse = client.index(request, RequestOptions.DEFAULT);
+    		  
+
+      return "success";
+  }	
+	
+	
+	//fuzzyQuery 유사 키워드 
+	//검색어와 필드 값이 조금 차이가 나더라도 매치가 되도록 하고 싶을 수 있다. fuzziness 옵션을 지정하면 이것이 가능하다.
+	@GetMapping(value = "searchfuzzy")
+	//GetMapping은 RequestMapping(value="", method = RequestMethod.Get)을 대신 하는 코드 스프링 4.3버전 이후로 나왔다고함
+    public ResponseEntity searchfuzzy(String id) throws IOException {
+        QueryBuilder matchQueryBuilder = QueryBuilders.fuzzyQuery("title", id);
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+        sourceBuilder.query(matchQueryBuilder);
+        sourceBuilder.from(0);
+        sourceBuilder.size(50);
+        SearchRequest searchRequest = new SearchRequest("news-2021.02.14");
+        SearchResponse searchResponse = client.search(searchRequest,RequestOptions.DEFAULT);
+        JSONObject json = new JSONObject(searchResponse.toString());
+
+        return new ResponseEntity<>(json.toMap(), HttpStatus.OK);
+    }
+	
+	@GetMapping(value = "searchprefix")
+    public ResponseEntity searchprefix(String id) throws IOException {
+        QueryBuilder matchQueryBuilder = QueryBuilders.prefixQuery("title", id);
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+        sourceBuilder.query(matchQueryBuilder);
+        sourceBuilder.from(0);
+        sourceBuilder.size(50);
+        SearchRequest searchRequest = new SearchRequest("news-2021.02.14");
+        searchRequest.source(sourceBuilder);
+        SearchResponse searchResponse = client.search(searchRequest,RequestOptions.DEFAULT);
+        JSONObject json = new JSONObject(searchResponse.toString());
+
+        return new ResponseEntity<>(json.toMap(), HttpStatus.OK);
+    }
+
+	@GetMapping(value = "searchcount")
+    public ResponseEntity searchcount() throws IOException {
+
+		String[] exclude = {"size", "min_doc_count", "shard_min_doc_count", "show_term_doc_count_error", "order"};
+		SearchRequest searchRequest = new SearchRequest("news_keyword-2021.02.16");
+		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+//		System.out.println(searchSourceBuilder);
+//		searchSourceBuilder.size(0);
+//		//searchSourceBuilder.fetchSource(null, exclude);
+//		
+		TermsAggregationBuilder aggregation = AggregationBuilders.terms("group_by_word").field("word.keyword");
+		
+//		System.out.println(aggregation);
+//		ValueCountAggregationBuilder aggregation = AggregationBuilders.count("agg").field("word.keyword");
+
+
+
+		SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+		Terms test = searchResponse.getAggregations().get("word");
+		for (Terms.Bucket entry : test.getBuckets()) {
+			System.out.println(entry.getKey());
+			System.out.println(entry.getDocCount());
+		}
+		
+//		AggregationBuilders.terms("").field("word.keyword").order(BucketOrder.count(true));
+//		SearchResponse searchResponse = client.
+		
+//		System.out.println(termsAgg);
+//		TermsAggregationBuilder
+////		CountRequest countRequest = new CountRequest();
+//		SearchRequest searchRequest = new SearchRequest("news_keyword-2021.02.16");
+//		searchRequest.set
+//		SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+//		searchSourceBuilder.query(QueryBuilders.matchAllQuery());
+//		SearchResponse searchResponse = client.search(searchRequest,RequestOptions.DEFAULT);
+		
+//		
+//		countRequest.source(searchSourceBuilder);
+//		CountResponse countResponse = client.count(countRequest,RequestOptions.DEFAULT);
+//		System.out.println(countRequest);
+//		System.out.println(countResponse);
+//		JSONObject json = new JSONObject(searchResponse.toString());
+//        QueryBuilder matchQueryBuilder = QueryBuilders.prefixQuery("title", id);
+//        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+//        sourceBuilder.query(matchQueryBuilder);
+//        sourceBuilder.from(0);
+//        sourceBuilder.size(50);
+//        SearchRequest searchRequest = new SearchRequest("news-2021.02.14");
+//        searchRequest.source(sourceBuilder);
+        JSONObject json = new JSONObject(searchResponse.toString());
+        System.out.println(searchRequest);
+        System.out.println(searchSourceBuilder);
+        System.out.println(searchResponse);
+        return new ResponseEntity<>(json.toMap(), HttpStatus.OK);
+    }
+
+
+
+	//match_pharse 쿼리
+	//match 쿼리는 용어 사이에 띄어쓰기를 하면 bool-should 쿼리로 처리된다. 
+	//띄어쓰기까지 모두 포함해 정확한 구(phrase)를 검색하고 싶다면 match_phrase 쿼리를 사용한다.
+	//예) 모든 단어가 정확한 위치에 있어야 매치된다.
+	@GetMapping(value = "searchmatchparse")
+    public ResponseEntity searchmatchparse(String id) throws IOException {
+        QueryBuilder matchQueryBuilder = QueryBuilders.matchPhrasePrefixQuery("title", id);
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+        sourceBuilder.query(matchQueryBuilder);
+        sourceBuilder.from(0);
+        sourceBuilder.size(50);
+        sourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC)); 
+        sourceBuilder.sort(new FieldSortBuilder("_id").order(SortOrder.ASC));  
+        SearchRequest searchRequest = new SearchRequest("news-2021.02.14");
+        searchRequest.source(sourceBuilder);
+        
+        SearchResponse searchResponse = client.search(searchRequest,RequestOptions.DEFAULT);
+        JSONObject json = new JSONObject(searchResponse.toString());
+        System.out.println(searchRequest);
+        System.out.println(sourceBuilder);
+        return new ResponseEntity<>(json.toMap(), HttpStatus.OK);
+    }
+	
+	@GetMapping(value = "searchworkdkeyword")
+    public ResponseEntity searchworkdkeyword(String id) throws IOException {
+        QueryBuilder matchQueryBuilder = QueryBuilders.prefixQuery("word", id);
+        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+        sourceBuilder.query(matchQueryBuilder);
+        sourceBuilder.from(0);
+        sourceBuilder.size(10); 
+        SearchRequest searchRequest = new SearchRequest("news-2021.02.16");
+        searchRequest.source(sourceBuilder);
+        SearchResponse searchResponse = client.search(searchRequest,RequestOptions.DEFAULT);
+        JSONObject json = new JSONObject(searchResponse.toString());
+
+        return new ResponseEntity<>(json.toMap(), HttpStatus.OK);
+    }
+	
+	
+	@GetMapping(value = "bulkrequest")
+    public BulkResponse bulkrequest() throws IOException {
+		BulkRequest request = new BulkRequest(); 
+		request.add(new IndexRequest("news-2021.02.16").id("1")  
+		        .source(XContentType.JSON,"word", "금융감독원"));
+		request.add(new IndexRequest("news-2021.02.16").id("2")  
+		        .source(XContentType.JSON,"word", "금융결제원"));
+		request.add(new IndexRequest("news-2021.02.16").id("3")  
+		        .source(XContentType.JSON,"word", "금융조합"));
+		request.add(new IndexRequest("news-2021.02.16").id("4")  
+		        .source(XContentType.JSON,"word", "금융소비자원"));
+		request.add(new IndexRequest("news-2021.02.16").id("5")  
+		        .source(XContentType.JSON,"word", "금융산업"));
+		request.add(new IndexRequest("news-2021.02.16").id("6")  
+		        .source(XContentType.JSON,"word", "금융 자격증"));
+		request.add(new IndexRequest("news-2021.02.16").id("7")  
+		        .source(XContentType.JSON,"word", "금융 데이터"));
+		request.add(new IndexRequest("news-2021.02.16").id("8")  
+		        .source(XContentType.JSON,"word", "금융이란"));
+		request.add(new IndexRequest("news-2021.02.16").id("9")  
+		        .source(XContentType.JSON,"word", "금융위기"));
+		request.add(new IndexRequest("news-2021.02.16").id("10")  
+		        .source(XContentType.JSON,"word", "부자"));
+		request.add(new IndexRequest("news-2021.02.16").id("11")  
+		        .source(XContentType.JSON,"word", "부동산"));
+		request.add(new IndexRequest("news-2021.02.16").id("12")  
+		        .source(XContentType.JSON,"word", "부양"));
+		request.add(new IndexRequest("news-2021.02.16").id("13")  
+		        .source(XContentType.JSON,"word", "삼성"));
+		request.add(new IndexRequest("news-2021.02.16").id("14")  
+		        .source(XContentType.JSON,"word", "삼성전자"));
+		request.add(new IndexRequest("news-2021.02.16").id("15")  
+		        .source(XContentType.JSON,"word", "삼성에스원"));
+		request.add(new IndexRequest("news-2021.02.16").id("16")  
+		        .source(XContentType.JSON,"word", "삼성전기"));
+		request.add(new IndexRequest("news-2021.02.16").id("17")  
+		        .source(XContentType.JSON,"word", "경제뉴스"));
+		request.add(new IndexRequest("news-2021.02.16").id("18")  
+		        .source(XContentType.JSON,"word", "경제신문"));
+		request.add(new IndexRequest("news-2021.02.16").id("19")  
+		        .source(XContentType.JSON,"word", "경제위기"));
+		request.add(new IndexRequest("news-2021.02.16").id("20")  
+		        .source(XContentType.JSON,"word", "경제란"));
+		BulkResponse bulkResponse = client.bulk(request, RequestOptions.DEFAULT);
+		return bulkResponse;
+//		JSONObject json = new JSONObject(bulkResponse.toString());
+//		System.out.println(json);
+
+
+//        QueryBuilder matchQueryBuilder = QueryBuilders.matchPhrasePrefixQuery("title", id);
+//        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+//        sourceBuilder.query(matchQueryBuilder);
+//        sourceBuilder.from(0);
+//        sourceBuilder.size(50);
+//        sourceBuilder.sort(new ScoreSortBuilder().order(SortOrder.DESC)); 
+//        sourceBuilder.sort(new FieldSortBuilder("_id").order(SortOrder.ASC));  
+//        SearchRequest searchRequest = new SearchRequest("news-2021.02.14");
+//        searchRequest.source(sourceBuilder);
+//        SearchResponse searchResponse = client.search(searchRequest,RequestOptions.DEFAULT);
+//        JSONObject json = new JSONObject(searchResponse.toString());
+//
+//        return new ResponseEntity<>(json.toMap(), HttpStatus.OK);
+    }
+//	
+//	//multiMatchQuery 여러 field에 name, name2에 윤기용이라는 단어가 있는지 검색
+//	@GetMapping(value = "search103")
+//    public SearchResponse search103() throws IOException {
+//        QueryBuilder matchQueryBuilder = QueryBuilders.multiMatchQuery("윤기용", "name", "name2");
+//
+//        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+//        sourceBuilder.query(matchQueryBuilder);
+//
+//        SearchRequest searchRequest = new SearchRequest("users3");
+//        searchRequest.source(sourceBuilder);
+//        
+//        SearchResponse searchResponse = client.search(searchRequest,RequestOptions.DEFAULT);
+//        return searchResponse;
+//    }
+//
+//	@GetMapping(value = "search104")
+//    public SearchResponse search104() throws IOException {
+//		QueryBuilder matchQueryBuilder = QueryBuilders.multiMatchQuery("윤기용", "name", "name2");
+//
+//        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+//        sourceBuilder.query(matchQueryBuilder);
+//
+//        SearchRequest searchRequest = new SearchRequest("users3");
+//        searchRequest.source(sourceBuilder);
+//        
+//        SearchResponse searchResponse = client.search(searchRequest,RequestOptions.DEFAULT);
+//        return searchResponse;
+//    }
+//
+//	@GetMapping(value = "search1")
+//    public SearchResponse search1() throws IOException {
+//        QueryBuilder matchQueryBuilder = QueryBuilders.matchQuery("title", "금융");
+//
+//        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+//        sourceBuilder.query(matchQueryBuilder);
+//
+//        SearchRequest searchRequest = new SearchRequest("news-2021.02.14");
+//        searchRequest.source(sourceBuilder);
+//        SearchResponse searchResponse = client.search(searchRequest,RequestOptions.DEFAULT);
+//        return searchResponse;
+//    }
+//
+//    //sort정렬해서 윤기용만 조회
+//    @GetMapping(value = "search2")
+//    public SearchResponse search2() throws IOException {
+//        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+//        sourceBuilder.query(QueryBuilders.matchQuery("title", "금융"))
+//                .from(0)
+//                .size(100)
+//                .timeout(new TimeValue(3, TimeUnit.MINUTES))
+//                .sort(new FieldSortBuilder("_id").order(SortOrder.ASC))
+//                .sort(new ScoreSortBuilder().order(SortOrder.DESC));
+//
+//        SearchRequest searchRequest = new SearchRequest();
+//        searchRequest.indices("news-2021.02.14");
+//        searchRequest.source(sourceBuilder);
+//
+//        SearchResponse searchResponse = client.search(searchRequest,RequestOptions.DEFAULT);
+//        return searchResponse;
+//    }
+//    
+//    //users 전체 조회
+//    @GetMapping(value = "search3")
+//    public SearchResponse search3() throws IOException {
+//        QueryBuilder matchQueryBuilder = QueryBuilders.matchAllQuery();
+//
+//        SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+//        sourceBuilder.query(matchQueryBuilder);
+//
+//        SearchRequest searchRequest = new SearchRequest("users");
+//        searchRequest.source(sourceBuilder);
+//        SearchResponse searchResponse = client.search(searchRequest,RequestOptions.DEFAULT);
+//        return searchResponse;
+//    }
+
+
+
+}
+
+
